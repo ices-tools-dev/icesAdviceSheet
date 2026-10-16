@@ -1,4 +1,4 @@
-# icesAdviceDraft
+# icesAdviceSheet
 
 Draft ICES advice sheets, as Word documents, for any stock published in the
 ICES Stock Assessment Graphs (SAG) database. For a stock and assessment year
