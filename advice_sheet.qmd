@@ -1,0 +1,192 @@
+---
+title: ""
+format:
+  docx:
+    # Written by run_advice() from templates/advice_template.docx, with the
+    # stock code, year, ecoregion, publication date and DOI filled in.
+    reference-doc: _reference.docx
+    number-sections: false
+    fig-width: 6.5
+    fig-height: 5
+    fig-dpi: 300
+crossref:
+  fig-title: '**Figure**'
+  tbl-title: '**Table**'
+  title-delim: '**:**'
+execute:
+  echo: false
+  warning: false
+  message: false
+params:
+  stock_code: "sol.27.7d"
+  assessment_year: 2026
+  data_dir: "data"
+---
+
+```{r setup}
+#| include: false
+suppressPackageStartupMessages({
+  library(icesAdviceDraft)
+  library(flextable)
+  library(officer)
+})
+# Two small internal helpers used in captions and tables below
+sag_field <- icesAdviceDraft:::sag_field
+advice_category_label <- icesAdviceDraft:::advice_category_label
+
+set_flextable_defaults(
+  font.family = "Calibri",
+  font.size = 9,
+  table.layout = "fixed",
+  border.color = "black",
+  background.color = "white",
+  big.mark = " ",
+  decimal.mark = ".",
+  padding = 2
+)
+
+stock_code <- params$stock_code
+assessment_year <- params$assessment_year
+advice_year <- assessment_year + 1
+
+x <- readRDS(file.path(params$data_dir, paste0(stock_code, "_", assessment_year, ".rds")))
+sag <- x$sag
+f <- advice_fields(x)
+
+pending <- function(what) paste0("**[Pending: ", what, "]**")
+or_pending <- function(v, what) if (is.na(v) || !nzchar(v)) pending(what) else v
+
+# Short stock name for captions, e.g. "Sole in Division 7.d (eastern English Channel)"
+cap_name <- or_pending(f$title_md, "stock description")
+status_txt <- status_sentence(sag, f$refpts, assessment_year)
+```
+
+## `r cap_name`
+
+# ICES advice on fishing opportunities
+
+`r or_pending(f$advice_sentence, "advice sentence from ASD")`
+
+```{r}
+#| results: asis
+for (gap in asd_gaps(x$asd_record)) cat(pending(gap), "\n\n")
+```
+
+# Stock development over time
+
+`r or_pending(status_txt, "stock status sentence, check reference points")`
+
+```{r}
+#| label: fig-summary
+#| fig-cap: !expr 'paste0(cap_name, ". Summary of the stock assessment. Catches (landings and discards where available), recruitment, fishing pressure, and spawning-stock biomass, with reference points where defined.")'
+#| fig-height: 3.6
+plot_stock_summary(
+  sag,
+  refpts = f$refpts,
+  stamp = paste(stock_code, assessment_year, x$assessment_key,
+                format(Sys.time(), "%Y%m%d%H%M%S"), sep = "_")
+)
+```
+
+```{r}
+#| results: asis
+for (gap in sag_gaps(sag)) cat(pending(gap), "\n\n")
+```
+
+# Catch scenarios
+
+```{r}
+#| label: tbl-catchscenarios
+#| tbl-cap: !expr 'paste0(cap_name, ". Annual catch scenarios for ", advice_year, ". All weights are in tonnes.")'
+asd_scenarios_ft(x$asd_table, x$asd_notes)
+```
+
+# Basis of the advice
+
+```{r}
+#| label: tbl-advicebasis
+#| tbl-cap: !expr 'paste0(cap_name, ". The basis of the advice.")'
+mp_txt <- if (is.na(f$management_plan_link) || !nzchar(f$management_plan_link)) {
+  "[To be supplied by the expert group.]"
+} else {
+  paste0(
+    "[To be supplied by the expert group.] ASD: management alignment = ",
+    f$management_alignment, "; plan reference: ", f$management_plan_link
+  )
+}
+item_table_ft(data.frame(
+  Item = c("Advice basis", "Management plan"),
+  Description = c(
+    if (is.na(f$advice_category)) "[Pending: ASD advice category]" else advice_category_label(f$advice_category),
+    mp_txt
+  )
+))
+```
+
+# Quality of the assessment
+
+[Text to be supplied by the expert group.]
+
+# Reference points
+
+```{r}
+#| label: tbl-refpoints
+#| tbl-cap: !expr 'paste0(cap_name, ". Reference points, values, and their technical basis. Weights are in tonnes.")'
+refpts_ft(f$refpts)
+```
+
+# Basis of the assessment
+
+```{r}
+#| label: tbl-assbasis
+#| tbl-cap: !expr 'paste0(cap_name, ". Basis of the assessment and advice.")'
+item_table_ft(data.frame(
+  Item = c(
+    "ICES stock data category",
+    "Assessment type",
+    "Input data",
+    "Discards and bycatch",
+    "Indicators",
+    "Other information",
+    "Working group"
+  ),
+  Description = c(
+    if (is.na(f$data_category)) "[Pending: SID data category]" else paste0(f$data_category, "."),
+    if (is.na(f$assessment_type)) "[Pending: SID assessment type]" else paste0(f$assessment_type, "."),
+    "[To be supplied by the expert group.]",
+    "[To be supplied by the expert group.]",
+    "None.",
+    "[To be supplied by the expert group.]",
+    if (is.na(f$expert_group)) "[Pending: SID expert group]" else paste0(f$expert_group, ".")
+  )
+))
+```
+
+# History of the advice, catch, and management
+
+```{r}
+#| label: tbl-history
+#| tbl-cap: !expr 'paste0(cap_name, ". ICES advice, agreed TAC, and ICES estimates of catch. All weights are in tonnes.")'
+advice_history_ft(x$asd_history, sag)
+```
+
+# Summary of the assessment
+
+```{r}
+#| label: tbl-assessmentsummary
+#| tbl-cap: !expr 'paste0(cap_name, ". Assessment summary. Units are given in the column headings. ", if (is.na(sag_field(sag, "ConfidenceIntervalDefinition"))) "High and low are the confidence bounds." else paste0("High and low refer to ", sag_field(sag, "ConfidenceIntervalDefinition"), " confidence intervals."))'
+stock_summary_ft(sag)
+```
+
+# Sources and references
+
+```{r}
+#| results: asis
+cat(paste0(
+  "Recommended citation: ICES. ", assessment_year, ". ",
+  or_pending(f$title_md, "stock description"), ". ",
+  "*In* Report of the ICES Advisory Committee, ", assessment_year, ". ",
+  "ICES Advice ", assessment_year, ", ", stock_code, ". ",
+  if (is.na(f$doi)) pending("DOI") else paste0("https://doi.org/", f$doi)
+))
+```
