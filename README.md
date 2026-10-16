@@ -24,7 +24,7 @@ The draft marks what it could not fill in:
 
 ```r
 install.packages("remotes")
-remotes::install_github("<owner>/icesAdviceDraft",
+remotes::install_github("ices-tools-dev/icesAdviceDraft",
   repos = c("https://ices-tools-prod.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
