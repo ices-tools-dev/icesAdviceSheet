@@ -1,0 +1,34 @@
+Package: icesAdviceDraft
+Title: Draft ICES Advice Sheets from SID, SAG and ASD
+Version: 0.1.0
+Authors@R:
+    person("Neil", "Campbell", email = "neilcampbelll@gmail.com", role = c("aut", "cre"))
+Description: Generates draft ICES advice sheets as Word documents for a
+    given stock and assessment year. Stock information comes from the ICES
+    Stock Information Database (SID), assessment results, confidence bounds
+    and reference points from Stock Assessment Graphs (SAG), and the advice,
+    catch scenarios and advice history from the Advice and Scenarios
+    Database (ASD). The draft uses the ICES advice template, draws the ICES
+    standard graphs, and marks missing or inconsistent data, and text still
+    to be written by the expert group, for follow-up.
+License: GPL (>= 2)
+Encoding: UTF-8
+Depends: R (>= 4.3)
+Imports:
+    cowplot,
+    flextable,
+    ggplot2,
+    icesASD,
+    icesSAG,
+    icesSD,
+    officer,
+    quarto,
+    scales,
+    stats,
+    utils,
+    xml2,
+    zip
+Additional_repositories: https://ices-tools-prod.r-universe.dev
+SystemRequirements: Quarto command-line tool (>= 1.4), https://quarto.org
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
