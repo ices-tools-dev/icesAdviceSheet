@@ -26,7 +26,7 @@ The draft marks what it could not fill in:
 
 ```r
 install.packages("remotes")
-remotes::install_github("ices-tools-dev/icesAdviceDraft",
+remotes::install_github("ices-tools-dev/icesAdviceSheet",
   repos = c("https://ices-tools-prod.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
@@ -37,7 +37,7 @@ command-line tool (version 1.4 or later); RStudio includes it.
 ## Usage
 
 ```r
-library(icesAdviceDraft)
+library(icesAdviceSheet)
 
 # Download the data and render the draft
 draft <- run_advice("sol.27.7d", 2026)

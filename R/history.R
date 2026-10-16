@@ -113,7 +113,7 @@ plot_historical <- function(history, sag, refpts, from_assessment = NULL, first_
           labels = as.expression(lapply(refs, `[[`, "label")), name = NULL
         ) +
         ggplot2::guides(linetype = ggplot2::guide_legend(
-          nrow = if (length(refs) > 2) 2 else 1,
+          nrow = 1,
           override.aes = list(colour = vapply(refs, `[[`, "", "colour"))
         ))
     }
@@ -122,8 +122,9 @@ plot_historical <- function(history, sag, refpts, from_assessment = NULL, first_
       ggplot2::labs(title = title, y = ylab) +
       theme_sag(panel_col) +
       ggplot2::theme(
-        legend.key.width = ggplot2::unit(14, "pt"),
-        legend.text = ggplot2::element_text(size = 6, margin = ggplot2::margin(l = 1, r = 4))
+        legend.key.width = ggplot2::unit(12, "pt"),
+        legend.spacing.x = ggplot2::unit(0, "pt"),
+        legend.text = ggplot2::element_text(size = 6, margin = ggplot2::margin(l = 1, r = 3))
       )
   }
 

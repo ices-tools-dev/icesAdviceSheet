@@ -56,6 +56,32 @@ fix_caption_paragraphs <- function(docx) {
   invisible(n)
 }
 
+# Put "Citation box" paragraphs in a frame anchored to the bottom margin of
+# their page (the last page, for the recommended citation). The frame is set on
+# each paragraph, not in the style, because LibreOffice ignores frames in
+# styles. Safe to run more than once.
+anchor_citation_box <- function(docx) {
+  tmp <- tempfile("docx")
+  dir.create(tmp)
+  on.exit(unlink(tmp, recursive = TRUE))
+  utils::unzip(docx, exdir = tmp)
+  p <- file.path(tmp, "word", "document.xml")
+
+  xml <- readChar(p, file.size(p), useBytes = TRUE)
+  style <- '<w:pStyle w:val="CitationBox"/>'
+  frame <- '<w:framePr w:wrap="around" w:vAnchor="margin" w:hAnchor="margin" w:xAlign="center" w:yAlign="bottom"/>'
+  n <- lengths(regmatches(xml, gregexpr(paste0(style, "(?!<w:framePr)"), xml, perl = TRUE, useBytes = TRUE)))
+  if (n == 0) return(invisible(0L))
+  # framePr follows pStyle in schema order (pandoc writes no keepNext etc. here)
+  xml <- gsub(paste0(style, "(?!<w:framePr)"), paste0(style, frame), xml, perl = TRUE, useBytes = TRUE)
+  writeBin(charToRaw(xml), p)
+
+  docx <- file.path(normalizePath(dirname(docx)), basename(docx))
+  file.remove(docx)
+  zip::zip(docx, files = list.files(tmp, recursive = TRUE, all.files = TRUE), root = tmp)
+  invisible(n)
+}
+
 # Two adjacent <w:pPr> blocks -> one. The later setting of each property wins.
 merge_ppr <- function(s) {
   last_tag <- function(tag) {

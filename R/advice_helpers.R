@@ -117,7 +117,7 @@ sag_ssb_label <- function(sag) {
 
 #' Assessment summary table
 #'
-#' Estimate, high and low for recruitment, stock size and fishing pressure,
+#' Low, estimate and high for recruitment, stock size and fishing pressure,
 #' plus catches, landings and discards, from SAG. Values are shown in SAG's
 #' own units, as stored.
 #'
@@ -127,16 +127,15 @@ sag_ssb_label <- function(sag) {
 #' @family sheet building blocks
 #' @export
 stock_summary_ft <- function(sag) {
-  ci_label <- sag_field(sag, "ConfidenceIntervalDefinition")
   num <- function(v) ifelse(is.na(v), NA_character_, fmt_t(v))
   rat <- function(v) ifelse(is.na(v), NA_character_, as.character(v))
 
   tbl <- data.frame(
     Year = as.character(sag$Year),
-    R = num(sag$Recruitment), R_hi = num(sag$High_Recruitment), R_lo = num(sag$Low_Recruitment),
-    B = num(sag$StockSize), B_hi = num(sag$High_StockSize), B_lo = num(sag$Low_StockSize),
+    R_lo = num(sag$Low_Recruitment), R = num(sag$Recruitment), R_hi = num(sag$High_Recruitment),
+    B_lo = num(sag$Low_StockSize), B = num(sag$StockSize), B_hi = num(sag$High_StockSize),
     C = num(sag$Catches), L = num(sag$Landings), D = num(sag$Discards),
-    F = rat(sag$FishingPressure), F_hi = rat(sag$High_FishingPressure), F_lo = rat(sag$Low_FishingPressure)
+    F_lo = rat(sag$Low_FishingPressure), F = rat(sag$FishingPressure), F_hi = rat(sag$High_FishingPressure)
   )
 
   unit_line <- function(u) if (is.na(u)) "" else paste0("\n", u)
@@ -144,17 +143,16 @@ stock_summary_ft <- function(sag) {
   b_unit <- unit_line(sag_field(sag, "StockSizeUnits"))
   if (!nzchar(b_unit)) b_unit <- paste0("\n", missing_in_sag)
   c_unit <- unit_line(sag_field(sag, "CatchesLandingsUnits"))
-  hi <- if (is.na(ci_label)) "High" else paste0("High\n", ci_label)
-  lo <- if (is.na(ci_label)) "Low" else paste0("Low\n", ci_label)
 
   top <- c("Year",
            rep(paste0(sag_rec_label(sag), r_unit), 3),
            rep(paste0(sag_ssb_label(sag), b_unit), 3),
            paste0("Catches", c_unit), paste0("Landings", c_unit), paste0("Discards", c_unit),
            rep(sag_f_label(sag), 3))
-  sub <- c("Year", "Estimate", hi, lo, "Estimate", hi, lo,
+  # Interval definition (e.g. 95%) is given in the table caption
+  sub <- c("Year", "Low", "Estimate", "High", "Low", "Estimate", "High",
            paste0("Catches", c_unit), paste0("Landings", c_unit), paste0("Discards", c_unit),
-           "Estimate", hi, lo)
+           "Low", "Estimate", "High")
 
   flextable::flextable(tbl) |>
     flextable::set_header_labels(values = stats::setNames(as.list(sub), names(tbl))) |>

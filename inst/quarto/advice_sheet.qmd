@@ -28,13 +28,13 @@ params:
 ```{r setup}
 #| include: false
 suppressPackageStartupMessages({
-  library(icesAdviceDraft)
+  library(icesAdviceSheet)
   library(flextable)
   library(officer)
 })
 # Two small internal helpers used in captions and tables below
-sag_field <- icesAdviceDraft:::sag_field
-advice_category_label <- icesAdviceDraft:::advice_category_label
+sag_field <- icesAdviceSheet:::sag_field
+advice_category_label <- icesAdviceSheet:::advice_category_label
 
 set_flextable_defaults(
   font.family = "Calibri",
@@ -208,13 +208,21 @@ stock_summary_ft(sag)
 
 # Sources and references
 
+[To be supplied by the expert group.]
+
 ```{r}
 #| results: asis
-cat(paste0(
-  "Recommended citation: ICES. ", assessment_year, ". ",
-  or_pending(f$title_md, "stock description"), ". ",
-  "*In* Report of the ICES Advisory Committee, ", assessment_year, ". ",
-  "ICES Advice ", assessment_year, ", ", stock_code, ". ",
-  if (is.na(f$doi)) pending("DOI") else paste0("https://doi.org/", f$doi)
-))
+# "Citation box" style (in the template): boxed, at the bottom of the last page
+cat(
+  '::: {custom-style="Citation box"}\n',
+  paste0(
+    "Recommended citation: ICES. ", assessment_year, ". ",
+    or_pending(f$title_md, "stock description"), ". ",
+    "*In* Report of the ICES Advisory Committee, ", assessment_year, ". ",
+    "ICES Advice ", assessment_year, ", ", stock_code, ". ",
+    if (is.na(f$doi)) pending("DOI") else paste0("https://doi.org/", f$doi)
+  ),
+  "\n:::\n",
+  sep = ""
+)
 ```

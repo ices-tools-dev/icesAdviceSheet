@@ -70,7 +70,7 @@ render_advice <- function(stock_code, assessment_year, data_dir = "data", out_di
   work <- tempfile("advice")
   dir.create(work)
   on.exit(unlink(work, recursive = TRUE), add = TRUE)
-  file.copy(system.file("quarto", "advice_sheet.qmd", package = "icesAdviceDraft"), work)
+  file.copy(system.file("quarto", "advice_sheet.qmd", package = "icesAdviceSheet"), work)
   make_reference_doc(header_values(x), template = template, out = file.path(work, "_reference.docx"))
 
   out_file <- paste0(stock_code, "_", assessment_year, "_advice_draft.docx")
@@ -92,6 +92,8 @@ render_advice <- function(stock_code, assessment_year, data_dir = "data", out_di
 
   # Quarto writes caption paragraphs that Word rejects; repair them
   fix_caption_paragraphs(file.path(work, out_file))
+  # Recommended citation: boxed, at the bottom of the last page
+  anchor_citation_box(file.path(work, out_file))
 
   dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
   dest <- file.path(out_dir, out_file)
@@ -102,5 +104,5 @@ render_advice <- function(stock_code, assessment_year, data_dir = "data", out_di
 }
 
 default_template <- function() {
-  system.file("templates", "advice_template.docx", package = "icesAdviceDraft")
+  system.file("templates", "advice_template.docx", package = "icesAdviceSheet")
 }

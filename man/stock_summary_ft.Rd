@@ -14,7 +14,7 @@ stock_summary_ft(sag)
 A flextable.
 }
 \description{
-Estimate, high and low for recruitment, stock size and fishing pressure,
+Low, estimate and high for recruitment, stock size and fishing pressure,
 plus catches, landings and discards, from SAG. Values are shown in SAG's
 own units, as stored.
 }
