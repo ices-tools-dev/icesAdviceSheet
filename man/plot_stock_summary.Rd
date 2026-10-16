@@ -4,7 +4,13 @@
 \alias{plot_stock_summary}
 \title{ICES standard graphs}
 \usage{
-plot_stock_summary(sag, refpts, stamp = NULL, prelim_year = NULL)
+plot_stock_summary(
+  sag,
+  refpts,
+  stamp = NULL,
+  prelim_year = NULL,
+  unshade_recruitment = 1
+)
 }
 \arguments{
 \item{sag}{data frame from \code{\link[icesSAG:getStockDownloadData]{icesSAG::getStockDownloadData()}} (element
@@ -17,6 +23,10 @@ name (\code{FMSY}, \code{Fpa}, \code{FLim}, \code{MSYBtrigger}, \code{Bpa}, \cod
 \item{stamp}{text for the grey stamp above each panel (\code{NULL} for none).}
 
 \item{prelim_year}{catch year to show as preliminary (\code{NULL} for none).}
+
+\item{unshade_recruitment}{number of final recruitment bars drawn in a
+paler blue (e.g. recruitment assumed rather than estimated). \code{0} draws
+all bars in the same colour.}
 }
 \value{
 A cowplot grid of four ggplot panels.

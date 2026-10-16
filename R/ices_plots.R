@@ -15,6 +15,7 @@ ices_cols <- list(
   catches = "#002b5f",
   discards = "#fda500",
   recruitment = "#28b3e8",
+  recruitment_pale = "#93d9f3",   # recruitment blue, halfway to white
   errorbar = "#2f4f4f",
   fishing = "#ed5f26",
   fishing_ci = "#f2a497",
@@ -147,10 +148,17 @@ sag_line_panel <- function(df, low, est, high, refs, refpts, line_col, ci_col, c
 #'   `advice_fields(x)$refpts`. `NA` values are not drawn.
 #' @param stamp text for the grey stamp above each panel (`NULL` for none).
 #' @param prelim_year catch year to show as preliminary (`NULL` for none).
+#' @param unshade_recruitment number of final recruitment bars drawn in a
+#'   paler blue (e.g. recruitment assumed rather than estimated). `0` draws
+#'   all bars in the same colour.
 #' @return A cowplot grid of four ggplot panels.
 #' @family sheet building blocks
 #' @export
-plot_stock_summary <- function(sag, refpts, stamp = NULL, prelim_year = NULL) {
+plot_stock_summary <- function(sag, refpts, stamp = NULL, prelim_year = NULL, unshade_recruitment = 1) {
+  if (length(unshade_recruitment) != 1 || is.na(unshade_recruitment) ||
+      unshade_recruitment < 0 || unshade_recruitment != round(unshade_recruitment)) {
+    stop("unshade_recruitment must be a whole number, 0 or more.")
+  }
   sag <- sag[order(sag$Year), ]
   ci_label <- sag_field(sag, "ConfidenceIntervalDefinition")
   if (is.na(ci_label)) ci_label <- "Confidence interval"
@@ -207,9 +215,12 @@ plot_stock_summary <- function(sag, refpts, stamp = NULL, prelim_year = NULL) {
   sr <- ices_scaling(c(rec$est, rec$high), tonnes = FALSE)
   rec[c("low", "est", "high")] <- rec[c("low", "est", "high")] / sr$divisor
   rec_ci <- rec[!is.na(rec$low) & !is.na(rec$high), ]
+  # Last unshade_recruitment bars in the paler blue (not shown in the legend)
+  rec$shade <- "Recruitment"
+  rec$shade[seq_len(nrow(rec)) > nrow(rec) - unshade_recruitment] <- "Paler"
 
   p_rec <- ggplot2::ggplot(rec, ggplot2::aes(Year)) +
-    ggplot2::geom_col(ggplot2::aes(y = est, fill = "Recruitment"), width = 0.55)
+    ggplot2::geom_col(ggplot2::aes(y = est, fill = shade), width = 0.55)
   if (nrow(rec_ci)) {
     p_rec <- p_rec + ggplot2::geom_errorbar(
       data = rec_ci, ggplot2::aes(ymin = low, ymax = high, colour = ci_label),
@@ -217,7 +228,8 @@ plot_stock_summary <- function(sag, refpts, stamp = NULL, prelim_year = NULL) {
     )
   }
   p_rec <- p_rec +
-    ggplot2::scale_fill_manual(values = c(Recruitment = ices_cols$recruitment)) +
+    ggplot2::scale_fill_manual(values = c(Recruitment = ices_cols$recruitment, Paler = ices_cols$recruitment_pale),
+                               breaks = "Recruitment") +
     ggplot2::scale_colour_manual(values = stats::setNames(ices_cols$errorbar, ci_label)) +
     ggplot2::guides(fill = ggplot2::guide_legend(order = 1), colour = ggplot2::guide_legend(order = 2)) +
     y_zero() + x_years() +

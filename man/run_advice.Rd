@@ -11,7 +11,8 @@ run_advice(
   out_dir = "output",
   template = default_template(),
   historical_from = NULL,
-  historical_first_year = NULL
+  historical_first_year = NULL,
+  unshade_recruitment = 1
 )
 }
 \arguments{
@@ -33,6 +34,10 @@ includes all assessments downloaded (up to five).}
 \item{historical_first_year}{first data year on the x axis of the
 historical assessment plots. \code{NULL} (default) is 20 years before the
 latest assessment.}
+
+\item{unshade_recruitment}{number of final recruitment bars in the stock
+summary figure drawn in a paler blue (default 1). \code{0} draws all bars in
+the same colour.}
 }
 \value{
 Path to the draft \code{.docx}, invisibly.

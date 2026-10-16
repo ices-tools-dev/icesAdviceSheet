@@ -15,6 +15,9 @@
 #' @param historical_first_year first data year on the x axis of the
 #'   historical assessment plots. `NULL` (default) is 20 years before the
 #'   latest assessment.
+#' @param unshade_recruitment number of final recruitment bars in the stock
+#'   summary figure drawn in a paler blue (default 1). `0` draws all bars in
+#'   the same colour.
 #'
 #' @return Path to the draft `.docx`, invisibly.
 #'
@@ -28,11 +31,13 @@
 #' @export
 run_advice <- function(stock_code, assessment_year, data_dir = "data", out_dir = "output",
                        template = default_template(),
-                       historical_from = NULL, historical_first_year = NULL) {
+                       historical_from = NULL, historical_first_year = NULL,
+                       unshade_recruitment = 1) {
   get_stock_data(stock_code, assessment_year, out_dir = data_dir)
   render_advice(stock_code, assessment_year, data_dir = data_dir, out_dir = out_dir,
                 template = template, historical_from = historical_from,
-                historical_first_year = historical_first_year)
+                historical_first_year = historical_first_year,
+                unshade_recruitment = unshade_recruitment)
 }
 
 #' Render a draft advice sheet from saved data
@@ -59,7 +64,8 @@ run_advice <- function(stock_code, assessment_year, data_dir = "data", out_dir =
 #' @export
 render_advice <- function(stock_code, assessment_year, data_dir = "data", out_dir = "output",
                           template = default_template(),
-                          historical_from = NULL, historical_first_year = NULL) {
+                          historical_from = NULL, historical_first_year = NULL,
+                          unshade_recruitment = 1) {
   data_file <- file.path(data_dir, paste0(stock_code, "_", assessment_year, ".rds"))
   if (!file.exists(data_file)) {
     stop("No data for ", stock_code, " ", assessment_year, " in '", data_dir,
@@ -81,7 +87,8 @@ render_advice <- function(stock_code, assessment_year, data_dir = "data", out_di
       list(
         stock_code = stock_code,
         assessment_year = assessment_year,
-        data_dir = normalizePath(data_dir, winslash = "/")
+        data_dir = normalizePath(data_dir, winslash = "/"),
+        unshade_recruitment = unshade_recruitment
       ),
       # left out when NULL, so the sheet's defaults apply
       if (!is.null(historical_from)) list(historical_from = historical_from),
